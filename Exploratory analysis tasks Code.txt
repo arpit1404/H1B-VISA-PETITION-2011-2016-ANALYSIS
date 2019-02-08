@@ -1,0 +1,125 @@
+#	H1-B Visa Petition 2011-2016 Analysis
+# 	Group No - 101, members- Arpit Khandekar, Devavrat Bapat (Monday Class)
+# 	R Code for performing descriptive statistics and Exploratory Data analysis
+
+
+install.packages("ggplot2")
+install.packages("readxl")
+install.packages("mapproj", dependencies = TRUE)
+library(ggplot2)
+library(ggmap)
+library(scales)
+
+
+#1) Percentage of a h1-b visa petition by Status.
+
+ggplot(h1ball2, aes(x = (h1ball2$CASE_STATUS), fill=h1ball2$CASE_STATUS)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), color="black") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "H-1B Visa petition Status", y = "Percent", x = "CASE STATUS")+
+  scale_fill_discrete(name="Case Status")
+
+#2) Job position vs case status
+
+ggplot(h1ball2, aes(x= FULL_TIME_POSITION, fill= CASE_STATUS)) + 
+  theme_bw() + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), color="black") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", position = position_stack(vjust = 0.5)) +
+  scale_y_continuous(labels = percent)+
+  labs(y = "Count", title = "Job Position vs Case Status")
+
+#3) Data scientist ages vs years
+
+h1bds = read.csv("h1ball_data scientist.csv", header = T)
+year = h1bds$YEAR
+wage = h1bds$PREVAILING_WAGE
+job = h1bds$JOB_TITLE
+ggplot(h1bds, aes(as.factor(year), wage, fill=job)) + 
+theme_bw()+
+geom_boxplot()+
+labs(x="Years", y="Wages", title="Data Scientist Wages vs Years") +
+  scale_fill_discrete(name="Job Title")
+
+#4) Data Scientist vs Software Developer plot
+h1bdsvssd = read.csv("h1ball_dsvssd.csv", header = T)
+ggplot(h1bdsvssd, aes(as.factor(h1bdsvssd$YEAR), h1bdsvssd$PREVAILING_WAGE, fill=h1bdsvssd$JOB_TITLE)) + 
+  theme_bw()+
+  geom_boxplot()+
+  labs(x="Years", y="Wages", title="Data Scientist | Software Developer Wages vs Years") +
+  scale_fill_discrete(name="Job Title")
+
+
+#5)  Worksite vs Applications
+Library(scales)
+h1bworksite = read.csv("h1ball_worksite.csv", header = T)
+ggplot(h1bworksite, aes(x = (h1bworksite$WORKSITE_STATE), fill= h1bworksite$WORKSITE_STATE)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), color="black") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "Employer worksites (by States) vs H-1B Visa Applications filed", y = "Percent", x = "STATES")+
+  scale_fill_discrete(name="STATES")
+
+
+#6) Job Titles vs Applications
+h1bjobtitle = read.csv("h1ball_jobtitle.csv", header = T)
+ggplot(h1bjobtitle, aes(x = (h1bjobtitle$JOB_TITLE), fill= h1bjobtitle$JOB_TITLE)) +
+     geom_bar(aes(y = (..count..)/sum(..count..)), color="black") +
+     geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+     scale_y_continuous(labels = percent)+
+     labs(title = "Job Titles vs H-1B Visa Applications filed", x = "Job Titles", y = "Applications Filed")+
+   scale_fill_discrete(name="Job Titles")
+
+
+#7)Job Titles vs Applications Boxplot
+
+h1bjobtitle = read.csv("h1ball_jobtitle.csv", header = T)
+ggplot(h1bjobtitle, aes(as.factor(h1bjobtitle$JOB_TITLE), h1bjobtitle$PREVAILING_WAGE, fill=h1bjobtitle$JOB_TITLE)) +
+geom_boxplot(color="red")+
+theme_bw()+
+labs(title = "Job Titles vs Wages", x = "Job Titles", y = "Wages")+
+scale_fill_discrete(name="Job Titles")
+
+# 8) Employers vs Applications
+h1bemployer = read.csv("h1ball_employer.csv", header = T)
+
+ggplot(h1bemployer, aes(x = (h1bemployer$EMPLOYER_NAME), fill= h1bemployer$EMPLOYER_NAME)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), color="black") +
+  geom_text(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", vjust = -0.25) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "Employers vs H-1B Visa Applications filed", x = "Employers", y = "Applications Filed")+
+  scale_fill_discrete(name="Employers")
+
+
+#9)  Employers vs Wages Boxplot
+h1bemployer = read.csv("h1ball_employer.csv", header = T)
+
+ggplot(h1bemployer, aes(as.factor(h1bemployer$EMPLOYER_NAME), h1bemployer$PREVAILING_WAGE, fill=h1bemployer$EMPLOYER_NAME)) +
+  geom_boxplot(color="red")+
+  theme_bw()+
+  labs(title = "Employers vs Wages", x = "Employers", y = "Wages")+
+  scale_fill_discrete(name="Employers")
+
+
+#10) Drawing world maps
+library(ggplot2)
+library(ggmap)
+
+install.packages("mapproj", dependencies = TRUE)
+map1 <- get_map(location = 'united states of america', zoom = 4)
+
+h1bMapData = data.frame(LON = h1ball$lon,
+                    LAT = h1ball$lat,
+                    case_status = h1ball$CASE_STATUS)
+case_statusmap + geom_point(data = h1bMapData, aes(x = LON, y = LAT, color = case_status), size=3.5)
+
+
+
+# 11) Job titles vs case status vs applications
+ggplot(h1bjobtitle, aes(x = (h1bjobtitle$JOB_TITLE), fill= h1bjobtitle$CASE_STATUS)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), color="black") +
+ geom_text_repel(aes(y = ((..count..)/sum(..count..)), label = scales::percent((..count..)/sum(..count..))), stat = "count", position_dodge(width =1)) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "Job Titles vs H-1B Visa Applications filed", x = "Job Titles", y = "Applications Filed")+
+  scale_fill_discrete(name="Job Titles")
+
